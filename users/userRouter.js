@@ -16,7 +16,7 @@ router.post('/', validateUser, async (req, res) => {
       }
 });
 
-router.post('/:id/posts', validateUserId, async (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
     const postInfo = { ...req.body, user_id: req.params.id };
   try {
     const post = await Posts.insert(postInfo);
@@ -102,7 +102,7 @@ async function validateUserId(req, res, next) {
             req.user = user;
             next();
         } else {
-            res.status(404).json({ message: "The user with the specified ID does not exist." })
+            res.status(404).json({ message: "Invalid user id" })
         }
     } catch (err) {
         res.status(500).json({ message: "Failed to process request" });
@@ -110,15 +110,27 @@ async function validateUserId(req, res, next) {
 };
 
 function validateUser(req, res, next) {
-    if (req.body && Object.keys(req.body).length && req.body.name !== "") {
-        next();
+    if(req.body && Object.keys(req.body).length) {
+        if(req.body.name !== "") {
+            next();
+        } else {
+            res.status(400).json({ message: "missing required name field" });
+        }
     } else {
-        res.status(400).json({ message: "Please provide a value for name" });
+        res.status(400).json({ message: "missing user data" });
     }
 };
 
-// function validatePost(req, res, next) {
-
-// };
+function validatePost(req, res, next) {
+    if(req.body && Object.keys(req.body).length) {
+        if(req.body.text !== "") {
+            next();
+        } else {
+            res.status(400).json({ message: "missing required text field" });
+        }
+    } else {
+        res.status(400).json({ message: "missing post data" });
+    }
+};
 
 module.exports = router;
