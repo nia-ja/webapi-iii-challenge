@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
       }
 });
 
-router.post('/:id/posts', async (req, res) => {
+router.post('/:id/posts', validateUserId, async (req, res) => {
     const postInfo = { ...req.body, user_id: req.params.id };
   try {
     const post = await Posts.insert(postInfo);
@@ -39,11 +39,11 @@ router.get('/', async (req, res) => {
       }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateUserId, async (req, res) => {
     try {
         const user = await Users.getById(req.params.id);
         if (user) {
-            res.status(200).json(user);
+            res.status(200).json(req.user);
         } else {
             res.status(404).json({ message: "The user with the specified ID does not exist." })
         }
@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/:id/posts', async (req, res) => {
+router.get('/:id/posts', validateUserId, async (req, res) => {
     try {
         const posts = await Users.getUserPosts(req.params.id);
         res.status(200).json(posts);
@@ -63,7 +63,7 @@ router.get('/:id/posts', async (req, res) => {
       }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateUserId, async (req, res) => {
     try {
         const count = await Users.remove(req.params.id);
         if (count > 0) {
@@ -78,7 +78,7 @@ router.delete('/:id', async (req, res) => {
       }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateUserId, async (req, res) => {
     try {
         const user = await Users.update(req.params.id, req.body);
         if (user) {
@@ -95,9 +95,19 @@ router.put('/:id', async (req, res) => {
 
 //custom middleware
 
-// function validateUserId(req, res, next) {
-
-// };
+async function validateUserId(req, res, next) {
+    try {
+        const user = await Users.getById(req.params.id);
+        if (user) {
+            req.user = user;
+            next();
+        } else {
+            res.status(404).json({ message: "The user with the specified ID does not exist." })
+        }
+    } catch (err) {
+        res.status(500).json({ message: "Failed to process request" });
+    }
+};
 
 // function validateUser(req, res, next) {
 
