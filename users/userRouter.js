@@ -5,13 +5,28 @@ const Posts = require('../posts/postDb.js');
 
 const router = express.Router();
 
-// router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
+    try {
+        const user = await Users.insert(req.body);
+        res.status(201).json(user);
+      } catch (error) {
+        res.status(500).json({
+          message: 'Error adding the user',
+        });
+      }
+});
 
-// });
-
-// router.post('/:id/posts', (req, res) => {
-
-// });
+router.post('/:id/posts', async (req, res) => {
+    const postInfo = { ...req.body, user_id: req.params.id };
+  try {
+    const post = await Posts.insert(postInfo);
+    res.status(210).json(post);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error saving the post for the user',
+    });
+  }
+});
 
 router.get('/', async (req, res) => {
     try {
