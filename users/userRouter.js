@@ -5,7 +5,7 @@ const Posts = require('../posts/postDb.js');
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/', validateUser, async (req, res) => {
     try {
         const user = await Users.insert(req.body);
         res.status(201).json(user);
@@ -78,7 +78,7 @@ router.delete('/:id', validateUserId, async (req, res) => {
       }
 });
 
-router.put('/:id', validateUserId, async (req, res) => {
+router.put('/:id', validateUserId, validateUser, async (req, res) => {
     try {
         const user = await Users.update(req.params.id, req.body);
         if (user) {
@@ -109,9 +109,13 @@ async function validateUserId(req, res, next) {
     }
 };
 
-// function validateUser(req, res, next) {
-
-// };
+function validateUser(req, res, next) {
+    if (req.body && Object.keys(req.body).length && req.body.name !== "") {
+        next();
+    } else {
+        res.status(400).json({ message: "Please provide a value for name" });
+    }
+};
 
 // function validatePost(req, res, next) {
 
