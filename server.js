@@ -16,7 +16,6 @@ server.get('/', (req, res) => {
 });
 
 //custom middleware
-
 function myLogger(req, res, next) {
   console.log(`Method: ${req.method}, url: ${req.url}, timestamp: [${new Date().toISOString()}]`);
   next();
